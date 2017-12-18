@@ -1,4 +1,4 @@
-package com.hhy.mydubbo.proxy;
+package com.hhy.mydubbo.rpcclient;
 
 import com.hhy.mydubbo.bean.Request;
 import com.hhy.mydubbo.bean.Response;
@@ -20,7 +20,16 @@ public class RpcProxy {
     private static final Logger LOGGER = LoggerFactory.getLogger(RpcProxy.class);
 
     private String  url;
-    public RpcProxy(String url) {
+    private String  name;
+    public RpcProxy(String name) {
+        this.name = name;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
         this.url = url;
     }
 
