@@ -30,6 +30,7 @@ public class LonConClient extends SimpleChannelInboundHandler<Response> {
 //    private String url;
     private Map<Long,Storage> resulMap=new ConcurrentHashMap<Long,Storage>();
     private Map<String,Channel> clientMap=new ConcurrentHashMap<String,Channel>();
+    private Map<String,Object> lockMap=new ConcurrentHashMap<String,Object>();
 
     private LonConClient() {
     }
@@ -57,9 +58,9 @@ public class LonConClient extends SimpleChannelInboundHandler<Response> {
     }
 
     public  Storage send(String url,Request request) throws Exception {
-        Channel channel=getClient(url);
         Storage storage=new Storage();
         resulMap.put(request.getId(),storage);
+        Channel channel=getClient(url);
         System.out.println("open:"+channel.isOpen());
         if(channel!=null){
             channel.write(request);
@@ -70,9 +71,16 @@ public class LonConClient extends SimpleChannelInboundHandler<Response> {
         return storage;
     }
     private Channel getClient(String url) throws InterruptedException {
-        Channel channel= clientMap.get(url);
-        if(channel==null){
-            EventLoopGroup group = new NioEventLoopGroup();
+        Object obj=lockMap.get(url);
+        if(obj==null){
+            obj=new Object();
+            lockMap.put(url,obj);
+        }
+        Channel channel=null;
+        synchronized (obj){
+            channel= clientMap.get(url);
+            if(channel==null){
+                EventLoopGroup group = new NioEventLoopGroup();
 //            try {
                 Bootstrap bootstrap = new Bootstrap();
                 bootstrap.group(group);
@@ -96,7 +104,9 @@ public class LonConClient extends SimpleChannelInboundHandler<Response> {
 //            } finally {
 ////                group.shutdownGracefully();
 //            }
+            }
         }
+
         return channel;
     }
 }
