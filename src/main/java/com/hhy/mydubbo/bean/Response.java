@@ -11,11 +11,11 @@ public class Response implements Serializable {
     private Long id;
     private String errorMsg;
     private Object result;
+    //是否是事件
+    private boolean event = false;
     public Response(Long id){
         this.id=id;
     }
-    //是否是事件
-    private boolean event = false;
 
     public Long getId() {
         return id;

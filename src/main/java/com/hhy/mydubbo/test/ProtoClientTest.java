@@ -1,5 +1,6 @@
 package com.hhy.mydubbo.test;
 
+import com.hhy.mydubbo.protobuf.client.ProtoRpcProxy;
 import com.hhy.mydubbo.proxy.PerforRpcProxy;
 import com.hhy.mydubbo.service.HelloService;
 import com.hhy.mydubbo.service.Person;
@@ -14,23 +15,17 @@ import java.util.List;
  * @Author：huanghaiyun
  * @Date:2017/12/7
  */
-public class PerformanceTest {
+public class ProtoClientTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PerformanceTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProtoClientTest.class);
     public static void main(String[] args) {
-        String url="127.0.0.1:9020";
-        PerforRpcProxy rpcProxy =new PerforRpcProxy(url);
+        String url="127.0.0.1:9030";
+        ProtoRpcProxy rpcProxy =new ProtoRpcProxy(url);
 
         HelloService helloService = rpcProxy.create(HelloService.class);
 
-//        long time = System.currentTimeMillis();
-//        String result = helloService.hello("World");
-//        System.out.println("get result："+result);
-//
-//        long t1=System.currentTimeMillis() - time;
-//        LOGGER.info("time: {}ms",t1);
         Person p=new Person();
-        p.setName("Test\\n\\m/r{[]:@3124!@#$%^&&*}");
+        p.setName("Test\\n\\m\\\\r/r{[]:''@3124!@#$%^&&*}<>?\\///\\as sa");
         p.setAge(123);
         Person fa=new Person();
         fa.setName("father");
@@ -40,14 +35,12 @@ public class PerformanceTest {
         list.add("asdasd");
         list.add("a122");
         p.setList(list);
-//        Person p1=helloService.helloPerson(p);
-//        System.out.println(p1);
+        System.out.println(p.getName().equals("Test\\n\\m\\\\r/r{[]:''@3124!@#$%^&&*}<>?\\///\\as sa"));
         long time = System.currentTimeMillis();
-//        for(int i=0;i<1000;i++){
-        Person p1=helloService.helloPerson(p);
-//        }
+        helloService.helloPerson(p);
         long t1=System.currentTimeMillis() - time;
         LOGGER.info("time: {}ms",t1);
-        System.out.println(p1.getName());
+//        System.out.println(qwe.getName());
+//        System.out.println(qwe.getName().equals(p.getName()));
     }
 }

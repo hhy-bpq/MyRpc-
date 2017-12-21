@@ -118,7 +118,7 @@ public class Decode extends ByteToMessageDecoder {
     public Object decodePacking(ByteBuf buffer) throws Exception {
 
         int save = buffer.readerIndex();
-        System.out.println("save:"+save);
+//        System.out.println("save:"+save);
         Object result=null;
         do {
             Object obj =decode(buffer);

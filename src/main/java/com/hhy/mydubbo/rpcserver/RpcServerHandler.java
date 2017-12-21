@@ -1,4 +1,4 @@
-package com.hhy.mydubbo.server;
+package com.hhy.mydubbo.rpcserver;
 
 import com.hhy.mydubbo.bean.Request;
 import com.hhy.mydubbo.bean.Response;
@@ -20,7 +20,6 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<Request> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RpcServerHandler.class);
 
     private final Map<String, Object> handlerMap;
-    int count =0;
 
     public RpcServerHandler(Map<String, Object> handlerMap) {
         this.handlerMap = handlerMap;
@@ -29,8 +28,6 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<Request> {
     @Override
     public void channelRead0(final ChannelHandlerContext ctx, Request request) throws Exception {
         // 创建并初始化 RPC 响应对象
-        count++;
-        System.out.println("get channel:"+count);
         Response response = new Response(request.getId());
 //        response.setRequestId(request.getRequestId());
         try {

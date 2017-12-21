@@ -4,7 +4,6 @@ import com.hhy.mydubbo.Code.Decode;
 import com.hhy.mydubbo.Code.Encode;
 import com.hhy.mydubbo.bean.Request;
 import com.hhy.mydubbo.bean.Response;
-import com.hhy.mydubbo.product.Storage;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -27,9 +26,10 @@ public class RpcClient extends SimpleChannelInboundHandler<Response> {
 
     private static final RpcClient INSTANCE=new RpcClient();
 
-//    private String url;
+    //    private String url;
     private Map<Long,Storage> resulMap=new ConcurrentHashMap<Long,Storage>();
     private Map<String,Channel> clientMap=new ConcurrentHashMap<String,Channel>();
+    private Map<String,Object> lockMap=new ConcurrentHashMap<String,Object>();
 
     private RpcClient() {
     }
@@ -40,12 +40,13 @@ public class RpcClient extends SimpleChannelInboundHandler<Response> {
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Response response) throws Exception {
+        LOGGER.info("getRequest id:{}",response.getId());
         Storage storage=resulMap.get(response.getId());
         if(storage!=null){
             storage.set(response);
             resulMap.remove(response.getId());
         }else{
-            System.out.println("stroage 为空");
+        	LOGGER.error("stroage 为空");
         }
     }
 
@@ -55,23 +56,29 @@ public class RpcClient extends SimpleChannelInboundHandler<Response> {
         ctx.close();
     }
 
-    public  Storage send(String url,Request request) throws Exception {
-        Channel channel=getClient(url);
+    public  Response send(String url,Request request) throws Exception {
         Storage storage=new Storage();
         resulMap.put(request.getId(),storage);
-        System.out.println("open:"+channel.isOpen());
+        Channel channel=getClient(url);
         if(channel!=null){
             channel.write(request);
             channel.flush();
         }else{
             throw new Exception("没有channel");
         }
-        return storage;
+        return storage.get();
     }
     private Channel getClient(String url) throws InterruptedException {
-        Channel channel= clientMap.get(url);
-        if(channel==null){
-            EventLoopGroup group = new NioEventLoopGroup();
+        Object obj=lockMap.get(url);
+        if(obj==null){
+            obj=new Object();
+            lockMap.put(url,obj);
+        }
+        Channel channel=null;
+        synchronized (obj){
+            channel= clientMap.get(url);
+            if(channel==null){
+                EventLoopGroup group = new NioEventLoopGroup();
 //            try {
                 Bootstrap bootstrap = new Bootstrap();
                 bootstrap.group(group);
@@ -95,15 +102,9 @@ public class RpcClient extends SimpleChannelInboundHandler<Response> {
 //            } finally {
 ////                group.shutdownGracefully();
 //            }
-        }
-        return channel;
-    }
-    class HeartThread extends Thread{
-        @Override
-        public void run() {
-            while (true){
-
             }
         }
+
+        return channel;
     }
 }

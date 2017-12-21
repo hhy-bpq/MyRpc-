@@ -2,6 +2,7 @@ package com.hhy.mydubbo.server;
 
 import com.hhy.mydubbo.Code.Decode;
 import com.hhy.mydubbo.Code.Encode;
+import com.hhy.mydubbo.rpcserver.RpcServerHandler;
 import com.hhy.mydubbo.service.HelloServiceImpl;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -40,7 +41,7 @@ public class RpcServer {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
-            Thread.sleep(10000);
+//            Thread.sleep(10000);
             // 创建并初始化 Netty 服务端 Bootstrap 对象
             ServerBootstrap bootstrap = new ServerBootstrap();
             bootstrap.group(bossGroup, workerGroup);

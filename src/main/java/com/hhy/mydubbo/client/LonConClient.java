@@ -4,7 +4,7 @@ import com.hhy.mydubbo.Code.Decode;
 import com.hhy.mydubbo.Code.Encode;
 import com.hhy.mydubbo.bean.Request;
 import com.hhy.mydubbo.bean.Response;
-import com.hhy.mydubbo.product.Storage;
+import com.hhy.mydubbo.rpcclient.Storage;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -41,7 +41,6 @@ public class LonConClient extends SimpleChannelInboundHandler<Response> {
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Response response) throws Exception {
-        System.out.println(response);
         Storage storage=resulMap.get(response.getId());
         if(storage!=null){
             storage.set(response);

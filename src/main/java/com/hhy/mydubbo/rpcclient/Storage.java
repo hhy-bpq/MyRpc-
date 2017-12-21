@@ -1,4 +1,4 @@
-package com.hhy.mydubbo.product;
+package com.hhy.mydubbo.rpcclient;
 
 import com.hhy.mydubbo.bean.Response;
 

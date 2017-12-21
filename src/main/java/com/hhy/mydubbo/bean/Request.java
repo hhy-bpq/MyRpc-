@@ -1,6 +1,7 @@
 package com.hhy.mydubbo.bean;
 
 import java.io.Serializable;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 自定义协议request 内容体
@@ -9,6 +10,8 @@ import java.io.Serializable;
  */
 public class Request implements Serializable{
     private static final long serialVersionUID = -3489984679839149018L;
+    //java 提供的自增长计数器
+    private static final AtomicLong INVOKE_ID = new AtomicLong(0);
     //请求的id
     private Long id;
     //方法名
@@ -27,7 +30,11 @@ public class Request implements Serializable{
     //是否是事件
     private boolean event = false;
     public  Request(){
-        this.id=1L;
+        this.id=newId();
+    }
+    private static long newId() {
+        // getAndIncrement()增长到MAX_VALUE时，再增长会变为MIN_VALUE，负数也可以做为ID
+        return INVOKE_ID.getAndIncrement();
     }
     public  Request(Long id){
         this.id=id;

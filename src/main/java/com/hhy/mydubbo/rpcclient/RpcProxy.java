@@ -2,7 +2,6 @@ package com.hhy.mydubbo.rpcclient;
 
 import com.hhy.mydubbo.bean.Request;
 import com.hhy.mydubbo.bean.Response;
-import com.hhy.mydubbo.client.RpcClient;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,12 +16,13 @@ import java.lang.reflect.Proxy;
  */
 public class RpcProxy {
 
+
     private static final Logger LOGGER = LoggerFactory.getLogger(RpcProxy.class);
 
     private String  url;
-    private String  name;
-    public RpcProxy(String name) {
-        this.name = name;
+    public RpcProxy(String url) {
+        this.url = url;
+
     }
 
     public String getUrl() {
@@ -56,9 +56,9 @@ public class RpcProxy {
                         String s=method.getDeclaringClass().getName();
                         request.setVersion(serviceVersion);
 //                        // 创建 RPC 客户端对象并发送 RPC 请求
-                        RpcClient client = new RpcClient(url);
+                        RpcClient client =RpcClient.getINSTANCE();
 //                        long time = System.currentTimeMillis();
-                        Response response = client.send(request);
+                        Response response = client.send(url,request);
 //                        LOGGER.info("time: {}ms", System.currentTimeMillis() - time);
                         if (response == null) {
                             throw new RuntimeException("response is null");

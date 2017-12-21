@@ -1,14 +1,16 @@
-package com.hhy.mydubbo.client;
+package com.hhy.mydubbo.protobuf.client;
 
-import com.hhy.mydubbo.Code.Decode;
-import com.hhy.mydubbo.Code.Encode;
-import com.hhy.mydubbo.bean.Request;
-import com.hhy.mydubbo.bean.Response;
+import com.hhy.mydubbo.protobuf.bean.RpcRequestProto;
+import com.hhy.mydubbo.protobuf.bean.RpcResponseProto;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.protobuf.ProtobufDecoder;
+import io.netty.handler.codec.protobuf.ProtobufEncoder;
+import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
+import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,36 +19,28 @@ import org.slf4j.LoggerFactory;
  * @Author：huanghaiyun
  * @Date:2017/12/7
  */
-public class PerforClient extends SimpleChannelInboundHandler<Response> {
+public class ProtoShortClient extends SimpleChannelInboundHandler<RpcResponseProto.RpcResponse> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PerforClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProtoShortClient.class);
 
     private String url;
 
-    private Response response;
-    private Request request;
-    private int count=0;
-    private long times=1000000;
+    private RpcResponseProto.RpcResponse response;
+    private RpcRequestProto.RpcRequest request;
 
-    public PerforClient(String url, Request request) {
+    public ProtoShortClient(String url, RpcRequestProto.RpcRequest request) {
         this.url = url;
         this.request=request;
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-        for(int i=0;i<times;i++){
-            ctx.writeAndFlush(request);
-        }
+        ctx.writeAndFlush(request);
     }
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, Response response) throws Exception {
-//        System.out.println(count);
-        if(++count>=times){
-            this.response = response;
-            ctx.close();
-        }
-
+    public void channelRead0(ChannelHandlerContext ctx, RpcResponseProto.RpcResponse response) throws Exception {
+        this.response = response;
+        ctx.close();
     }
 
     @Override
@@ -55,7 +49,7 @@ public class PerforClient extends SimpleChannelInboundHandler<Response> {
         ctx.close();
     }
 
-    public Response send() throws Exception {
+    public RpcResponseProto.RpcResponse send() throws Exception {
         EventLoopGroup group = new NioEventLoopGroup();
         try {
             // 创建并初始化 Netty 客户端 Bootstrap 对象
@@ -66,9 +60,11 @@ public class PerforClient extends SimpleChannelInboundHandler<Response> {
                 @Override
                 public void initChannel(SocketChannel channel) throws Exception {
                     ChannelPipeline pipeline = channel.pipeline();
-                    pipeline.addLast(new Encode()); // 编码 RPC 请求
-                    pipeline.addLast(new Decode()); // 解码 RPC 响应
-                    pipeline.addLast(PerforClient.this); // 处理 RPC 响应
+                    pipeline.addLast(new ChannelHandler[]{new ProtobufVarint32FrameDecoder()});
+                    pipeline.addLast(new ChannelHandler[]{new ProtobufDecoder(RpcResponseProto.RpcResponse.getDefaultInstance())});
+                    pipeline.addLast(new ChannelHandler[]{new ProtobufVarint32LengthFieldPrepender()});
+                    pipeline.addLast(new ChannelHandler[]{new ProtobufEncoder()});
+                    pipeline.addLast(ProtoShortClient.this); // 处理 RPC 响应
                 }
             });
             bootstrap.option(ChannelOption.TCP_NODELAY, true);
