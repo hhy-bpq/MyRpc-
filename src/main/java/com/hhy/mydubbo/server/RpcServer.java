@@ -9,11 +9,13 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Author：huanghaiyun
@@ -56,7 +58,6 @@ public class RpcServer {
                 }
             });
             bootstrap.option(ChannelOption.SO_BACKLOG, 1024);
-            bootstrap.childOption(ChannelOption.SO_KEEPALIVE, true);
             // 获取 RPC 服务器的 IP 地址与端口号
 //            String[] addressArray = StringUtils.split(serviceAddress, ":");
 //            String ip = addressArray[0];

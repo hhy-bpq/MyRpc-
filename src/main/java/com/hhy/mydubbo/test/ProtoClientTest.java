@@ -23,23 +23,26 @@ public class ProtoClientTest {
         ProtoRpcProxy rpcProxy =new ProtoRpcProxy(url);
 
         HelloService helloService = rpcProxy.create(HelloService.class);
+        System.out.println(helloService.hello("asd"));
+        while (true){
 
-        Person p=new Person();
-        p.setName("Test\\n\\m\\\\r/r{[]:''@3124!@#$%^&&*}<>?\\///\\as sa");
-        p.setAge(123);
-        Person fa=new Person();
-        fa.setName("father");
-        fa.setAge(55);
-        p.setFa(fa);
-        List<String> list=new ArrayList<>();
-        list.add("asdasd");
-        list.add("a122");
-        p.setList(list);
-        System.out.println(p.getName().equals("Test\\n\\m\\\\r/r{[]:''@3124!@#$%^&&*}<>?\\///\\as sa"));
-        long time = System.currentTimeMillis();
-        helloService.helloPerson(p);
-        long t1=System.currentTimeMillis() - time;
-        LOGGER.info("time: {}ms",t1);
+        }
+//        Person p=new Person();
+//        p.setName("Test\\n\\m\\\\r/r{[]:''@3124!@#$%^&&*}<>?\\///\\as sa");
+//        p.setAge(123);
+//        Person fa=new Person();
+//        fa.setName("father");
+//        fa.setAge(55);
+//        p.setFa(fa);
+//        List<String> list=new ArrayList<>();
+//        list.add("asdasd");
+//        list.add("a122");
+//        p.setList(list);
+//        System.out.println(p.getName().equals("Test\\n\\m\\\\r/r{[]:''@3124!@#$%^&&*}<>?\\///\\as sa"));
+//        long time = System.currentTimeMillis();
+//        helloService.helloPerson(p);
+//        long t1=System.currentTimeMillis() - time;
+//        LOGGER.info("time: {}ms",t1);
 //        System.out.println(qwe.getName());
 //        System.out.println(qwe.getName().equals(p.getName()));
     }

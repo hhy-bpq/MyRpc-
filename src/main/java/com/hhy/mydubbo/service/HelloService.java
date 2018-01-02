@@ -7,6 +7,8 @@ package com.hhy.mydubbo.service;
 public interface HelloService {
 
     String hello(String name);
-    Person helloPerson (Person person);
+    Person helloPerson(Person person);
+    void  test1();
+    void  test2() throws Exception;
 
 }

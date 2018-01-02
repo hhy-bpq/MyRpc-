@@ -27,6 +27,7 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<Request> {
 
     @Override
     public void channelRead0(final ChannelHandlerContext ctx, Request request) throws Exception {
+        LOGGER.error("get request:", request.getId());
         // 创建并初始化 RPC 响应对象
         Response response = new Response(request.getId());
 //        response.setRequestId(request.getRequestId());
@@ -39,6 +40,8 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<Request> {
         }
         // 写入 RPC 响应对象并自动关闭连接
         ctx.writeAndFlush(response);
+        ctx.close();
+        LOGGER.error("close");
     }
 
     private Object handle(Request request) throws Exception {

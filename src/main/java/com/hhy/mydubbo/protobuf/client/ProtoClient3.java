@@ -1,8 +1,6 @@
 package com.hhy.mydubbo.protobuf.client;
 
-import com.hhy.mydubbo.protobuf.bean.RpcRequestProto;
-import com.hhy.mydubbo.protobuf.bean.RpcResponseProto;
-import com.hhy.mydubbo.server.HeartbeatHandlerInitializer;
+import com.cyp.chx.rcenter.protobuff.bean.RpcProto;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -20,38 +18,29 @@ import org.slf4j.LoggerFactory;
  * @Author：huanghaiyun
  * @Date:2017/12/7
  */
-public class ProtoClient extends SimpleChannelInboundHandler<RpcResponseProto.RpcResponse> {
+public class ProtoClient3 extends SimpleChannelInboundHandler<RpcProto.ProtoData> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProtoClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProtoClient3.class);
 
     private String url;
 
-    private RpcResponseProto.RpcResponse response;
-    private RpcRequestProto.RpcRequest request;
-    private int count=0;
-//    private long times=1000000;
-    private long times=1;
+    private RpcProto.ProtoData response;
+    private RpcProto.ProtoData request;
 
-    public ProtoClient(String url, RpcRequestProto.RpcRequest request) {
+    public ProtoClient3(String url,RpcProto.ProtoData request) {
         this.url = url;
         this.request=request;
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-        for(long i=0;i<times;i++){
-            ctx.writeAndFlush(request);
-        }
+        ctx.writeAndFlush(request);
     }
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, RpcResponseProto.RpcResponse response) throws Exception {
-//        System.out.println(count);
-        if(++count>=times){
-            this.response = response;
-            ctx.close();
-
-        }
-
+    public void channelRead0(ChannelHandlerContext ctx,RpcProto.ProtoData response) throws Exception {
+        this.response = response;
+        System.out.println(response);
+        ctx.close();
     }
 
     @Override
@@ -60,7 +49,7 @@ public class ProtoClient extends SimpleChannelInboundHandler<RpcResponseProto.Rp
         ctx.close();
     }
 
-    public RpcResponseProto.RpcResponse send() throws Exception {
+    public RpcProto.ProtoData send() throws Exception {
         EventLoopGroup group = new NioEventLoopGroup();
         try {
             // 创建并初始化 Netty 客户端 Bootstrap 对象
@@ -71,12 +60,11 @@ public class ProtoClient extends SimpleChannelInboundHandler<RpcResponseProto.Rp
                 @Override
                 public void initChannel(SocketChannel channel) throws Exception {
                     ChannelPipeline pipeline = channel.pipeline();
-                    pipeline.addLast(new HeartbeatHandlerInitializer());
                     pipeline.addLast(new ChannelHandler[]{new ProtobufVarint32FrameDecoder()});
-                    pipeline.addLast(new ChannelHandler[]{new ProtobufDecoder(RpcResponseProto.RpcResponse.getDefaultInstance())});
+                    pipeline.addLast(new ChannelHandler[]{new ProtobufDecoder(RpcProto.ProtoData.getDefaultInstance())});
                     pipeline.addLast(new ChannelHandler[]{new ProtobufVarint32LengthFieldPrepender()});
                     pipeline.addLast(new ChannelHandler[]{new ProtobufEncoder()});
-                    pipeline.addLast(ProtoClient.this); // 处理 RPC 响应
+                    pipeline.addLast(ProtoClient3.this); // 处理 RPC 响应
                 }
             });
             bootstrap.option(ChannelOption.TCP_NODELAY, true);

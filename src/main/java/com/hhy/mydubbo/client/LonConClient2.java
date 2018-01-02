@@ -18,26 +18,26 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 共享连接的客户端（需要加上心跳来保持长连接）
+ * 共享连接的客户端  解决线程池膨胀问题
  * @Author：huanghaiyun
  * @Date:2017/12/7
  */
 @ChannelHandler.Sharable
-public class LonConClient extends SimpleChannelInboundHandler<Response> {
+public class LonConClient2 extends SimpleChannelInboundHandler<Response> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LonConClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LonConClient2.class);
 
-    private static final LonConClient INSTANCE=new LonConClient();
+    private static final LonConClient2 INSTANCE=new LonConClient2();
 
-//    private String url;
+    private Bootstrap bootstrap ;
     private Map<Long,Storage> resulMap=new ConcurrentHashMap<Long,Storage>();
     private Map<String,Channel> clientMap=new ConcurrentHashMap<String,Channel>();
     private Map<String,Object> lockMap=new ConcurrentHashMap<String,Object>();
 
-    private LonConClient() {
+    private LonConClient2() {
     }
 
-    public static LonConClient getINSTANCE() {
+    public static LonConClient2 getINSTANCE() {
         return INSTANCE;
     }
 
@@ -91,31 +91,33 @@ public class LonConClient extends SimpleChannelInboundHandler<Response> {
                 channel.close();
                 clientMap.remove(url);
                 channel=null;
-                System.out.println("新客户端");
             }
             if(channel==null){
-                EventLoopGroup group = new NioEventLoopGroup();
-                Bootstrap bootstrap = new Bootstrap();
-                bootstrap.group(group);
-                bootstrap.channel(NioSocketChannel.class);
-                bootstrap.handler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    public void initChannel(SocketChannel channel) throws Exception {
-                        ChannelPipeline pipeline = channel.pipeline();
-                        pipeline.addLast(new Encode()); // 编码 RPC 请求
-                        pipeline.addLast(new Decode()); // 解码 RPC 响应
-                        pipeline.addLast(LonConClient.this); // 处理 RPC 响应
-                        pipeline.addLast(INSTANCE);
-                    }
-                });
-                bootstrap.option(ChannelOption.TCP_NODELAY, true);
+                if(bootstrap==null){
+                    System.out.println("新客户端");
+                    EventLoopGroup group = new NioEventLoopGroup();
+                    bootstrap = new Bootstrap();
+                    bootstrap.group(group);
+                    bootstrap.channel(NioSocketChannel.class);
+                    bootstrap.handler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        public void initChannel(SocketChannel channel) throws Exception {
+                            ChannelPipeline pipeline = channel.pipeline();
+                            pipeline.addLast(new Encode()); // 编码 RPC 请求
+                            pipeline.addLast(new Decode()); // 解码 RPC 响应
+                            pipeline.addLast(LonConClient2.this); // 处理 RPC 响应
+                            pipeline.addLast(new HeartbeatHandlerInitializer());
+                        }
+                    });
+                    bootstrap.option(ChannelOption.TCP_NODELAY, true);
+                }
                 String[] address=url.split(":");
                 String host=address[0];
                 int port=Integer.valueOf(address[1]);
                 ChannelFuture channelFuture=bootstrap.connect(host, port).sync();
                 channel=channelFuture.channel();
                 clientMap.put(url,channel);
-                System.out.println("asd");
+                System.out.println(clientMap.size());
             }
         }
 
